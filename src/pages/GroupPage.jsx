@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useLocation } from 'react-router-dom'
 import api from '../api/axios.js'
 import '../styles/GroupPage.css'
 
@@ -9,17 +9,21 @@ import GroupDetails from '../components/GroupDetails.jsx'
 function GroupPage() {
 
     const { groupId } = useParams();
+    const location = useLocation();
 
-    const [group, setGroup] = useState(null)
-    const [loading, setLoading] = useState(true)
+    const initialGroup = location.state || null;
+    const [group, setGroup] = useState(initialGroup)
+    const [loading, setLoading] = useState(!initialGroup)
     const [error, setError] = useState(null)
 
     useEffect(() => {
-        api.get(`/groups/${groupId}`)
+        if(!group) {
+            api.get(`/groups/${groupId}`)
             .then(res => setGroup(res.data))
             .catch(err => setError(err))
-            .finally(() => setLoading(false));   
-    }, [groupId]);
+            .finally(() => setLoading(false)); 
+        }  
+    }, [groupId, group]);
 
     if(loading) return <p>Loading...</p>;
     if(error) return <p>{error}</p>;
